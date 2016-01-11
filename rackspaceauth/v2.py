@@ -24,8 +24,9 @@ Rackspace identity plugins.
 # by end of year 2015.
 import requests
 requests.packages.urllib3.disable_warnings()
+from oslo_config import cfg
 
-from keystoneauth1.identity import v2
+from keystoneclient.auth.identity import v2
 
 AUTH_URL = "https://identity.api.rackspacecloud.com/v2.0/"
 
@@ -49,8 +50,24 @@ class APIKey(v2.Auth):
 
     def get_auth_data(self, headers=None):
         return {"RAX-KSKEY:apiKeyCredentials":
-                {"username": self.username, "apiKey": self.api_key}}
+               {"username": self.username, "apiKey": self.api_key}}
 
+    @classmethod
+    def get_options(cls):
+        options = super(APIKey, cls).get_options()
+        options.extend([
+            cfg.StrOpt('username',
+                       help='Username to authenticate with'),
+            cfg.StrOpt('api_key',
+                       help='APIKey to authenticate with'),
+            cfg.StrOpt('reauthenticate',
+                       help='Allow fetching a new token if current ' \
+                            'one is expired'),
+        ])
+        for option in options:
+            if not hasattr(option, 'deprecated'):
+                option.deprecated = []
+        return options
 
 class Password(v2.Auth):
 
@@ -73,6 +90,23 @@ class Password(v2.Auth):
         return {"passwordCredentials": {
                 "username": self.username, "password": self.password}}
 
+    @classmethod
+    def get_options(cls):
+        options = super(Password, cls).get_options()
+        options.extend([
+            cfg.StrOpt('username',
+                       help='Username to authenticate with'),
+            cfg.StrOpt('password',
+                       help='Password to authenticate with'),
+            cfg.StrOpt('reauthenticate',
+                       help='Allow fetching a new token if current ' \
+                            'one is expired'),
+        ])
+        for option in options:
+            if not hasattr(option, 'deprecated'):
+                option.deprecated = []
+        return options
+
 
 class Token(v2.Auth):
 
@@ -91,3 +125,17 @@ class Token(v2.Auth):
     def get_auth_data(self, headers=None):
         return {"token": {"id": self.token},
                 "tenantId": self.tenant_id}
+
+    @classmethod
+    def get_options(cls):
+        options = super(Token, cls).get_options()
+        options.extend([
+            cfg.StrOpt('tenant_id',
+                       help='Tenant ID to authenticate with'),
+            cfg.StrOpt('token',
+                       help='Token to authenticate with'),
+        ])
+        for option in options:
+            if not hasattr(option, 'deprecated'):
+                option.deprecated = []
+        return options
