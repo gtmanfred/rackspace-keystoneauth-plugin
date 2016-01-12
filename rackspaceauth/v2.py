@@ -37,7 +37,8 @@ class RaxAuth(v2.Auth):
                      region_name=None, service_name=None, version=None,
                      **kwargs):
         endpoint = super(RaxAuth, self).get_endpoint(
-            session, service_type, interface, region_name, service_name, version, **kwargs
+            session, service_type, interface, region_name, service_name,
+            version, **kwargs
         )
         if service_type == 'network':
             endpoint = endpoint.strip('/v2.0')
@@ -63,7 +64,7 @@ class APIKey(RaxAuth):
 
     def get_auth_data(self, headers=None):
         return {"RAX-KSKEY:apiKeyCredentials":
-               {"username": self.username, "apiKey": self.api_key}}
+                {"username": self.username, "apiKey": self.api_key}}
 
     @classmethod
     def get_options(cls):
@@ -74,13 +75,14 @@ class APIKey(RaxAuth):
             cfg.StrOpt('api_key',
                        help='APIKey to authenticate with'),
             cfg.StrOpt('reauthenticate',
-                       help='Allow fetching a new token if current ' \
+                       help='Allow fetching a new token if current '
                             'one is expired'),
         ])
         for option in options:
             if not hasattr(option, 'deprecated'):
                 option.deprecated = []
         return options
+
 
 class Password(RaxAuth):
 
@@ -112,7 +114,7 @@ class Password(RaxAuth):
             cfg.StrOpt('password',
                        help='Password to authenticate with'),
             cfg.StrOpt('reauthenticate',
-                       help='Allow fetching a new token if current ' \
+                       help='Allow fetching a new token if current '
                             'one is expired'),
         ])
         for option in options:
